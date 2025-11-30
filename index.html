@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopVista - Modern E-Commerce Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Overlay (Shown First) -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="logo-large">
+                        <i class="fas fa-shopping-bag"></i>
+                        <h1>ShopVista</h1>
+                    </div>
+                    <p>Welcome! Please login to continue</p>
+                </div>
+
+                <!-- Step 1: Enter Phone/Email -->
+                <div id="loginStep1" class="login-step active">
+                    <h2>Sign In</h2>
+                    <form id="phoneEmailForm" class="login-form">
+                        <div class="input-group">
+                            <label for="phoneEmail">
+                                <i class="fas fa-mobile-alt"></i> Phone Number or Email
+                            </label>
+                            <input 
+                                type="text" 
+                                id="phoneEmail" 
+                                placeholder="Enter phone number or email"
+                                required
+                                autocomplete="off"
+                            >
+                            <span class="input-hint">We'll send you an OTP to verify</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-paper-plane"></i> Send OTP
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Step 2: Enter OTP -->
+                <div id="loginStep2" class="login-step">
+                    <div class="step-indicator">
+                        <span class="step-number">1</span>
+                        <span class="step-line"></span>
+                        <span class="step-number active">2</span>
+                    </div>
+                    <h2>Enter OTP</h2>
+                    <p class="otp-info">We've sent a 6-digit OTP to <span id="otpSentTo"></span></p>
+                    
+                    <!-- Demo OTP Display Box -->
+                    <div class="otp-display-box" id="otpDisplayBox">
+                        <div class="otp-display-header">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Demo Mode - Your OTP is:</span>
+                        </div>
+                        <div class="otp-display-code" id="otpDisplayCode">
+                            <span id="displayOTP">------</span>
+                            <button class="copy-otp-btn" id="copyOTPBtn" onclick="copyOTP()">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <p class="otp-display-note">Note: This is a demo. In production, OTP would be sent via SMS/Email.</p>
+                    </div>
+                    
+                    <form id="otpForm" class="login-form">
+                        <div class="otp-input-container">
+                            <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" required>
+                            <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" required>
+                            <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" required>
+                            <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" required>
+                            <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" required>
+                            <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" required>
+                        </div>
+                        <input type="hidden" id="generatedOTP">
+                        <div class="otp-actions">
+                            <button type="button" class="btn-link" id="resendOTP">
+                                <i class="fas fa-redo"></i> Resend OTP
+                            </button>
+                            <span class="timer" id="otpTimer">Resend in 30s</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-check"></i> Verify OTP
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-block" id="backToStep1">
+                            <i class="fas fa-arrow-left"></i> Change Number/Email
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Step 3: Success -->
+                <div id="loginStep3" class="login-step success-step">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Login Successful!</h2>
+                    <p>Redirecting to home page...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Website Content (Hidden until login) -->
+    <div id="mainContent" class="main-content" style="display: none;">
+        <!-- Sticky Navigation Header -->
+        <header class="header" id="header">
+            <nav class="navbar">
+                <div class="nav-container">
+                    <div class="nav-brand">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>ShopVista</span>
+                    </div>
+                    
+                    <!-- Search Bar -->
+                    <div class="search-container">
+                        <input type="text" class="search-input" placeholder="Search for products, brands and more...">
+                        <button class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+
+                    <div class="nav-actions">
+                        <a href="#account" class="nav-action">
+                            <i class="fas fa-user"></i>
+                            <span>Account</span>
+                        </a>
+                        <a href="#cart" class="nav-action cart-action">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Cart</span>
+                            <span class="cart-badge" id="cartBadge">0</span>
+                        </a>
+                    </div>
+
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Hero Section with Carousel -->
+            <section id="home" class="hero-section">
+                <div class="hero-carousel" id="heroCarousel">
+                    <div class="carousel-slide active">
+                        <div class="slide-content">
+                            <h2 class="slide-title">Mega Sale!</h2>
+                            <p class="slide-subtitle">Up to 70% OFF on Electronics</p>
+                            <button class="btn btn-hero">Shop Now</button>
+                        </div>
+                        <div class="slide-bg slide-bg-1"></div>
+                    </div>
+                    <div class="carousel-slide">
+                        <div class="slide-content">
+                            <h2 class="slide-title">New Arrivals</h2>
+                            <p class="slide-subtitle">Latest Fashion Trends</p>
+                            <button class="btn btn-hero">Explore</button>
+                        </div>
+                        <div class="slide-bg slide-bg-2"></div>
+                    </div>
+                    <div class="carousel-slide">
+                        <div class="slide-content">
+                            <h2 class="slide-title">Flash Deals</h2>
+                            <p class="slide-subtitle">Limited Time Offers</p>
+                            <button class="btn btn-hero">Grab Now</button>
+                        </div>
+                        <div class="slide-bg slide-bg-3"></div>
+                    </div>
+                </div>
+                <div class="carousel-controls">
+                    <button class="carousel-btn prev" id="prevSlide">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-btn next" id="nextSlide">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="carousel-dots">
+                    <span class="dot active" data-slide="0"></span>
+                    <span class="dot" data-slide="1"></span>
+                    <span class="dot" data-slide="2"></span>
+                </div>
+            </section>
+
+            <!-- Featured Categories Section -->
+            <section id="categories" class="categories-section">
+                <div class="container">
+                    <h2 class="section-title">
+                        <span class="title-icon"><i class="fas fa-fire"></i></span>
+                        Top Categories
+                    </h2>
+                    <div class="categories-grid" id="categoriesGrid">
+                        <!-- Categories loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Grid Section -->
+            <section id="products" class="products-section">
+                <div class="container">
+                    <h2 class="section-title">
+                        <span class="title-icon"><i class="fas fa-star"></i></span>
+                        Trending Products
+                    </h2>
+                    <div class="products-filter">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="electronics">Electronics</button>
+                        <button class="filter-btn" data-filter="fashion">Fashion</button>
+                        <button class="filter-btn" data-filter="home">Home & Living</button>
+                        <button class="filter-btn" data-filter="sports">Sports</button>
+                        <button class="filter-btn" data-filter="beauty">Beauty</button>
+                        <button class="filter-btn" data-filter="books">Books</button>
+                    </div>
+                    <div class="products-grid" id="productsGrid">
+                        <!-- Products loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Offers/Deals Section -->
+            <section id="offers" class="offers-section">
+                <div class="container">
+                    <h2 class="section-title">
+                        <span class="title-icon"><i class="fas fa-bolt"></i></span>
+                        Limited Time Offers
+                    </h2>
+                    <div class="offers-grid" id="offersGrid">
+                        <!-- Offers loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testimonials Section -->
+            <section id="testimonials" class="testimonials-section">
+                <div class="container">
+                    <h2 class="section-title">
+                        <span class="title-icon"><i class="fas fa-quote-left"></i></span>
+                        What Our Customers Say
+                    </h2>
+                    <div class="testimonials-slider" id="testimonialsSlider">
+                        <!-- Testimonials loaded dynamically -->
+                    </div>
+                    <div class="testimonial-controls">
+                        <button class="testimonial-btn prev" id="prevTestimonial">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="testimonial-btn next" id="nextTestimonial">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Account Section -->
+            <section id="account" class="account-section">
+                <div class="container">
+                    <h2 class="section-title">My Account</h2>
+                    <div class="account-content">
+                        <div class="account-sidebar">
+                            <div class="account-profile">
+                                <div class="profile-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <h3 id="userDisplayName">User</h3>
+                                <p id="userEmail">user@example.com</p>
+                                <div class="profile-stats">
+                                    <div class="stat-mini">
+                                        <span class="stat-value" id="totalOrders">0</span>
+                                        <span class="stat-label">Orders</span>
+                                    </div>
+                                    <div class="stat-mini">
+                                        <span class="stat-value" id="wishlistCount">0</span>
+                                        <span class="stat-label">Wishlist</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <ul class="account-menu">
+                                <li class="active" data-tab="profile"><a href="#"><i class="fas fa-user"></i> Profile</a></li>
+                                <li data-tab="orders"><a href="#"><i class="fas fa-box"></i> Orders</a></li>
+                                <li data-tab="wishlist"><a href="#"><i class="fas fa-heart"></i> Wishlist</a></li>
+                                <li data-tab="settings"><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                                <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                        <div class="account-main">
+                            <!-- Profile Tab -->
+                            <div class="account-tab active" id="profileTab">
+                                <div class="account-card">
+                                    <div class="card-header">
+                                        <h3><i class="fas fa-user"></i> Profile Information</h3>
+                                        <button class="edit-btn" onclick="editProfile()">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </div>
+                                    <div class="profile-grid">
+                                        <div class="profile-field">
+                                            <label><i class="fas fa-envelope"></i> Email Address</label>
+                                            <div class="field-value" id="profileEmail">-</div>
+                                        </div>
+                                        <div class="profile-field">
+                                            <label><i class="fas fa-phone"></i> Phone Number</label>
+                                            <div class="field-value" id="profilePhone">-</div>
+                                        </div>
+                                        <div class="profile-field">
+                                            <label><i class="fas fa-calendar"></i> Member Since</label>
+                                            <div class="field-value" id="memberSince">-</div>
+                                        </div>
+                                        <div class="profile-field">
+                                            <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                                            <div class="field-value" id="profileAddress">Not set</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="account-card">
+                                    <h3><i class="fas fa-chart-line"></i> Account Statistics</h3>
+                                    <div class="stats-grid">
+                                        <div class="stat-card">
+                                            <div class="stat-icon" style="background: linear-gradient(135deg, #2563eb, #7c3aed);">
+                                                <i class="fas fa-shopping-bag"></i>
+                                            </div>
+                                            <div class="stat-info">
+                                                <div class="stat-number" id="statOrders">0</div>
+                                                <div class="stat-text">Total Orders</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #f97316);">
+                                                <i class="fas fa-dollar-sign"></i>
+                                            </div>
+                                            <div class="stat-info">
+                                                <div class="stat-number" id="statSpent">$0</div>
+                                                <div class="stat-text">Total Spent</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                                <i class="fas fa-heart"></i>
+                                            </div>
+                                            <div class="stat-info">
+                                                <div class="stat-number" id="statWishlist">0</div>
+                                                <div class="stat-text">Wishlist Items</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card">
+                                            <div class="stat-icon" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                                                <i class="fas fa-star"></i>
+                                            </div>
+                                            <div class="stat-info">
+                                                <div class="stat-number" id="statReviews">0</div>
+                                                <div class="stat-text">Reviews Written</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Orders Tab -->
+                            <div class="account-tab" id="ordersTab">
+                                <div class="account-card">
+                                    <div class="card-header">
+                                        <h3><i class="fas fa-box"></i> My Orders</h3>
+                                        <div class="order-filters">
+                                            <button class="filter-chip active" data-filter="all">All</button>
+                                            <button class="filter-chip" data-filter="pending">Pending</button>
+                                            <button class="filter-chip" data-filter="delivered">Delivered</button>
+                                            <button class="filter-chip" data-filter="cancelled">Cancelled</button>
+                                        </div>
+                                    </div>
+                                    <div class="orders-list" id="ordersList">
+                                        <!-- Orders loaded dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Wishlist Tab -->
+                            <div class="account-tab" id="wishlistTab">
+                                <div class="account-card">
+                                    <div class="card-header">
+                                        <h3><i class="fas fa-heart"></i> My Wishlist</h3>
+                                        <span class="wishlist-count" id="wishlistCountBadge">0 items</span>
+                                    </div>
+                                    <div class="wishlist-grid" id="wishlistGrid">
+                                        <!-- Wishlist items loaded dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Settings Tab -->
+                            <div class="account-tab" id="settingsTab">
+                                <div class="account-card">
+                                    <h3><i class="fas fa-cog"></i> Account Settings</h3>
+                                    <div class="settings-section">
+                                        <h4><i class="fas fa-bell"></i> Notifications</h4>
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <label>Email Notifications</label>
+                                                <p>Receive updates about your orders and promotions</p>
+                                            </div>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <label>SMS Notifications</label>
+                                                <p>Get order updates via SMS</p>
+                                            </div>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <label>Marketing Emails</label>
+                                                <p>Receive promotional offers and discounts</p>
+                                            </div>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox" checked>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="settings-section">
+                                        <h4><i class="fas fa-shield-alt"></i> Privacy & Security</h4>
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <label>Change Password</label>
+                                                <p>Update your account password</p>
+                                            </div>
+                                            <button class="btn btn-secondary" onclick="showChangePassword()">Change</button>
+                                        </div>
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <label>Two-Factor Authentication</label>
+                                                <p>Add an extra layer of security</p>
+                                            </div>
+                                            <label class="toggle-switch">
+                                                <input type="checkbox">
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="settings-section">
+                                        <h4><i class="fas fa-trash-alt"></i> Danger Zone</h4>
+                                        <div class="setting-item danger">
+                                            <div class="setting-info">
+                                                <label>Delete Account</label>
+                                                <p>Permanently delete your account and all data</p>
+                                            </div>
+                                            <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cart Section -->
+            <section id="cart" class="cart-section">
+                <div class="container">
+                    <h2 class="section-title">Shopping Cart</h2>
+                    <div class="cart-content" id="cartContent">
+                        <!-- Cart items loaded dynamically -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3>ShopVista</h3>
+                        <p>Your trusted online shopping destination. Quality products, great prices, fast delivery.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-facebook"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-linkedin"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="#home">Home</a></li>
+                            <li><a href="#categories">Categories</a></li>
+                            <li><a href="#products">Products</a></li>
+                            <li><a href="#offers">Offers</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Customer Service</h4>
+                        <ul>
+                            <li><a href="#">Contact Us</a></li>
+                            <li><a href="#">FAQ</a></li>
+                            <li><a href="#">Shipping Info</a></li>
+                            <li><a href="#">Returns</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Newsletter</h4>
+                        <p>Subscribe to get updates on new products and exclusive offers.</p>
+                        <form class="newsletter-form" id="newsletterForm">
+                            <input type="email" placeholder="Enter your email" required>
+                            <button type="submit">
+                                <i class="fas fa-paper-plane"></i> Subscribe
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 ShopVista. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Back to Top Button -->
+        <button id="backToTop" class="back-to-top">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+
+    <!-- Product Reviews Modal -->
+    <div id="reviewsModal" class="reviews-modal">
+        <div class="reviews-modal-content">
+            <div class="reviews-modal-header">
+                <h2 id="reviewsProductName">Product Reviews</h2>
+                <button class="close-reviews" onclick="closeReviewsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="reviews-modal-body" id="reviewsModalBody">
+                <!-- Reviews loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
+
