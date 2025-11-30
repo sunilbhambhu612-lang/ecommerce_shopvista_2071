@@ -33,6 +33,6 @@ No password required.
 
 ## 🚀 Deployment Link (Mandatory)
 Live Project Link:  
-https://your-deployed-project-link.com
+https://ecommerce-shopvista-2071-5l7my8csx-ramchandra-jats-projects.vercel.app
 
 ---
